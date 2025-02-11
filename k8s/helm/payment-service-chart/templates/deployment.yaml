@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: { { .Release.Name } }-payment-service
+spec:
+  replicas: { { .Values.replicaCount } }
+  selector:
+    matchLabels:
+      app: { { .Release.Name } }-payment-service-app
+  template:
+    metadata:
+      labels:
+        app: { { .Release.Name } }-payment-service-app
+    spec:
+      containers:
+          - name: { { .Release.Name } }-payment-service-app
+            image: { { .Values.image.repository } }:{{ .Values.image.tag }}
+            imagePullPolicy: { { .Values.image.pullPolicy } }
+            ports:
+              - containerPort: 8080
+            env:
+              - name: SPRING_DATASOURCE_URL
+                value: { { include "spring-app.postgresqlURL" . | quote } }
+              - name: SPRING_DATASOURCE_USERNAME
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-secret
+                    key: POSTGRES_USER
+              - name: SPRING_DATASOURCE_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-secret
+                    key: POSTGRES_PASSWORD
+              - name: SPRING_PROFILES_ACTIVE
+                value: dep
+              - name: KAFKA_URL
+                value: kafka-service:9092
+              - name: AXON_URL
+                value: axonserver-grpc:8124

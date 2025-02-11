@@ -1,0 +1,46 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: api-gateway
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - backend-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/api/v1/order"
+      route:
+        - destination:
+            host: order-service
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: "/api/v1/payment"
+      route:
+        - destination:
+            host: payment-service
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: "/api/v1/product"
+      route:
+        - destination:
+            host: product-service
+            port:
+              number: 80
+    - match:
+        - uri:
+            prefix: "/api/v1/cart"
+      route:
+        - destination:
+            host: cart-service
+            port:
+              number: 2020
+      headers:
+        request:
+          set:
+            Authorization: ""
